@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charity Water Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="game-page">
+        <h1 class="game-title">One Drop at a Time</h1>
+
+        <section class="top-chrome" aria-label="Top game controls">
+            <div class="star-tracker" aria-label="Star tracker">
+                <span class="star-icon">★</span>
+                <span class="star-icon">★</span>
+                <span class="star-icon">★</span>
+                <span class="star-icon">★</span>
+            </div>
+
+            <div class="controls">
+                <button id="start-water" type="button">Start Water</button>
+                <button id="reset-game" type="button">Reset</button>
+            </div>
+        </section>
+
+        
+
+        <section class="board-panel" aria-label="Digging board">
+            <div id="game-board" class="game-board"></div>
+        </section>
+
+        <section class="hud" aria-label="Game progress and status">
+            <div class="progress-wrap">
+                <label for="water-progress">Tank Fill Progress</label>
+                <progress id="water-progress" max="100" value="0">0%</progress>
+                <span id="progress-text">0%</span>
+            </div>
+
+            <p id="status-message" class="status-message">Dig a path, then start the water.</p>
+        </section>
+
+        <section id="victory-overlay" class="victory-overlay" aria-live="polite" aria-hidden="true">
+            <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
+            <div class="victory-card" role="dialog" aria-modal="true" aria-labelledby="victory-title">
+                <h2 id="victory-title">Victory!</h2>
+                <p id="victory-message">You filled the tank one drop at a time.</p>
+                <p id="victory-jugs" class="victory-jugs">Jugs collected: 0/0</p>
+                <button id="victory-play-again" type="button">Play Again</button>
+            </div>
+        </section>
+
+        <section id="loss-overlay" class="loss-overlay" aria-live="polite" aria-hidden="true">
+            <div class="loss-card" role="dialog" aria-modal="true" aria-labelledby="loss-title">
+                <h2 id="loss-title">You Lost</h2>
+                <p id="loss-message">Your water touched dirty water.</p>
+                <button id="loss-play-again" type="button">Try Again</button>
+            </div>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
