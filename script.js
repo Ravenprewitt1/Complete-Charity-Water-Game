@@ -26,10 +26,14 @@ const dirtyWaterCells = [
 ];
 
 const boardElement = document.getElementById('game-board');
+const gamePage = document.querySelector('.game-page');
+const gameTitle = document.querySelector('.game-title');
+const topChrome = document.querySelector('.top-chrome');
+const boardPanel = document.querySelector('.board-panel');
+const hud = document.querySelector('.hud');
 const startButton = document.getElementById('start-water');
 const resetButton = document.getElementById('reset-game');
 const progressBar = document.getElementById('water-progress');
-const progressText = document.getElementById('progress-text');
 const statusMessage = document.getElementById('status-message');
 const starElements = document.querySelectorAll('.star-icon');
 const victoryOverlay = document.getElementById('victory-overlay');
@@ -50,6 +54,35 @@ let isDragging = false;
 let collectedJugCount = 0;
 let confettiTimeoutId = null;
 let isGameOver = false;
+
+function fitBoardToViewport() {
+	if (!gamePage || !gameTitle || !topChrome || !boardPanel || !hud) {
+		return;
+	}
+
+	const viewportWidth = window.innerWidth;
+	const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+	const pageStyles = window.getComputedStyle(gamePage);
+	const boardPanelStyles = window.getComputedStyle(boardPanel);
+	const bodyStyles = window.getComputedStyle(document.body);
+	const titleHeight = gameTitle.getBoundingClientRect().height;
+	const topChromeHeight = topChrome.getBoundingClientRect().height;
+	const hudHeight = hud.getBoundingClientRect().height;
+	const pagePaddingX = parseFloat(pageStyles.paddingLeft) + parseFloat(pageStyles.paddingRight);
+	const pagePaddingY = parseFloat(pageStyles.paddingTop) + parseFloat(pageStyles.paddingBottom);
+	const boardPanelPaddingX = parseFloat(boardPanelStyles.paddingLeft) + parseFloat(boardPanelStyles.paddingRight);
+	const boardPanelPaddingY = parseFloat(boardPanelStyles.paddingTop) + parseFloat(boardPanelStyles.paddingBottom);
+	const bodyPaddingX = parseFloat(bodyStyles.paddingLeft) + parseFloat(bodyStyles.paddingRight);
+	const bodyPaddingY = parseFloat(bodyStyles.paddingTop) + parseFloat(bodyStyles.paddingBottom);
+	const availableWidth = viewportWidth - bodyPaddingX - pagePaddingX - boardPanelPaddingX - 8;
+	const availableHeight = viewportHeight - bodyPaddingY - pagePaddingY - titleHeight - topChromeHeight - hudHeight - boardPanelPaddingY - 48;
+	const maxCellWidth = Math.floor(availableWidth / cols);
+	const maxCellHeight = Math.floor(availableHeight / rows);
+	const preferredCellSize = Math.min(maxCellWidth, maxCellHeight, 88);
+	const safeCellSize = Math.max(28, preferredCellSize);
+
+	document.documentElement.style.setProperty('--cell-size', `${safeCellSize}px`);
+}
 
 function isSameCell(a, b) {
 	return a.row === b.row && a.col === b.col;
@@ -310,7 +343,7 @@ function digCell(row, col) {
 		cell.type = 'tunnel';
 
 		if (cell.hasJug) {
-			statusMessage.textContent = 'Jug uncovered! Route water through it to collect the star.';
+			statusMessage.textContent = 'Jug uncovered! Route water through it to collect the jug.';
 		} else if (cell.hasDirtyWater) {
 			statusMessage.textContent = 'Dirty water pocket found. Keep clean water away from it!';
 		} else {
@@ -385,7 +418,6 @@ function clearWater() {
 function setProgress(value) {
 	progressValue = Math.max(0, Math.min(100, value));
 	progressBar.value = progressValue;
-	progressText.textContent = `${progressValue}%`;
 }
 
 function animateWater(path) {
@@ -488,6 +520,7 @@ function resetGame() {
 	setProgress(0);
 	createBoardData();
 	renderBoard();
+	fitBoardToViewport();
 	statusMessage.textContent = 'Dig a path, then start the water.';
 }
 
@@ -551,5 +584,8 @@ startButton.addEventListener('click', startWaterFlow);
 resetButton.addEventListener('click', resetGame);
 victoryPlayAgainButton.addEventListener('click', resetGame);
 lossPlayAgainButton.addEventListener('click', resetGame);
+
+window.addEventListener('resize', fitBoardToViewport);
+window.visualViewport?.addEventListener('resize', fitBoardToViewport);
 
 resetGame();
