@@ -89,6 +89,59 @@ body {
 	color: #0e5e8d;
 }
 
+.difficulty-wrap {
+	display: grid;
+	gap: 6px;
+}
+
+.difficulty-title {
+	margin: 0;
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: #1e6f99;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+.difficulty-controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.difficulty-btn {
+	padding: 5px 10px;
+	border-radius: 999px;
+	border: 1px solid #b7dbf2;
+	background: #e8f4fb;
+	color: #2c6687;
+	font-size: 0.78rem;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.difficulty-btn:hover {
+	filter: brightness(0.95);
+}
+
+.difficulty-btn[data-difficulty="easy"] {
+	background: linear-gradient(180deg, #a8e6a1 0%, #4FCB53 100%);
+	border-color: #2a9d2a;
+	color: #155a15;
+}
+
+.difficulty-btn[data-difficulty="medium"] {
+	background: linear-gradient(180deg, #ffec9a 0%, var(--cw-yellow) 100%);
+	border-color: #d7a600;
+	color: #7a5800;
+}
+
+.difficulty-btn[data-difficulty="hard"] {
+	background: linear-gradient(180deg, #ff8a7a 0%, #F5402C 100%);
+	border-color: #c71a0a;
+	color: #7a1a0a;
+}
+
 .level-list-wrap {
 	display: grid;
 	gap: 6px;

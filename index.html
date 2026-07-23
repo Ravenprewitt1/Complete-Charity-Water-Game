@@ -9,6 +9,14 @@
 <body>
     <div class="page-layout">
         <aside class="info-panel" aria-label="Water facts and mission">
+            <div class="difficulty-wrap" aria-label="Difficulty settings">
+                <p class="difficulty-title">Difficulty</p>
+                <div class="difficulty-controls" role="group" aria-label="Select difficulty">
+                    <button class="difficulty-btn" type="button" data-difficulty="easy" aria-pressed="false">Easy</button>
+                    <button class="difficulty-btn" type="button" data-difficulty="medium" aria-pressed="true">Medium</button>
+                    <button class="difficulty-btn" type="button" data-difficulty="hard" aria-pressed="false">Hard</button>
+                </div>
+            </div>
             <div class="level-list-wrap" aria-label="All levels">
                 <p class="level-list-title">All Levels</p>
                 <div id="level-list" class="level-list"></div>

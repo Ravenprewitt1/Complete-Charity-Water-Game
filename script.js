@@ -4,14 +4,12 @@ const cols = 8;
 const sourceCell = { row: 0, col: 0 };
 const goalCell = { row: rows - 1, col: cols - 1 };
 
-const levels = [
+const baseLevels = [
 	{
 		mission: 'Build a safe beginner path to the tank while collecting all 4 jugs.',
 		fact: '771 million people still live without clean water close to home.',
 		blockedCells: [
-			{ row: 2, col: 4 },
 			{ row: 3, col: 4 },
-			{ row: 4, col: 1 },
 			{ row: 6, col: 6 },
 			{ row: 7, col: 2 }
 		],
@@ -22,7 +20,6 @@ const levels = [
 			{ row: 8, col: 5 }
 		],
 		dirtyWaterCells: [
-			{ row: 2, col: 1 },
 			{ row: 4, col: 6 },
 			{ row: 6, col: 3 }
 		]
@@ -31,6 +28,7 @@ const levels = [
 		mission: 'Plan around new rock blocks and keep water away from dirty pockets.',
 		fact: 'Access to clean water can reduce waterborne diseases and save lives every day.',
 		blockedCells: [
+			{ row: 0, col: 4 },
 			{ row: 1, col: 4 },
 			{ row: 2, col: 4 },
 			{ row: 3, col: 2 },
@@ -44,6 +42,7 @@ const levels = [
 			{ row: 8, col: 4 }
 		],
 		dirtyWaterCells: [
+			{ row: 1, col: 6 },
 			{ row: 3, col: 5 },
 			{ row: 5, col: 2 },
 			{ row: 7, col: 6 }
@@ -53,8 +52,10 @@ const levels = [
 		mission: 'Use careful turns to collect every jug before reaching the tank.',
 		fact: 'When communities get clean water, kids can spend more time in school.',
 		blockedCells: [
+			{ row: 0, col: 2 },
 			{ row: 1, col: 2 },
 			{ row: 2, col: 2 },
+			{ row: 3, col: 5 },
 			{ row: 4, col: 5 },
 			{ row: 6, col: 4 },
 			{ row: 7, col: 6 }
@@ -66,8 +67,10 @@ const levels = [
 			{ row: 8, col: 2 }
 		],
 		dirtyWaterCells: [
+			{ row: 1, col: 6 },
 			{ row: 2, col: 6 },
 			{ row: 4, col: 2 },
+			{ row: 6, col: 1 },
 			{ row: 7, col: 4 }
 		]
 	},
@@ -75,11 +78,14 @@ const levels = [
 		mission: 'Create a zigzag tunnel to dodge rock walls and protect clean water.',
 		fact: 'Women and girls spend an estimated 200 million hours each day collecting water.',
 		blockedCells: [
+			{ row: 0, col: 3 },
 			{ row: 1, col: 3 },
 			{ row: 2, col: 3 },
 			{ row: 3, col: 3 },
+			{ row: 4, col: 5 },
 			{ row: 5, col: 6 },
-			{ row: 6, col: 1 }
+			{ row: 6, col: 1 },
+			{ row: 8, col: 4 }
 		],
 		jugCells: [
 			{ row: 1, col: 6 },
@@ -88,8 +94,11 @@ const levels = [
 			{ row: 8, col: 3 }
 		],
 		dirtyWaterCells: [
+			{ row: 1, col: 1 },
 			{ row: 2, col: 1 },
+			{ row: 3, col: 6 },
 			{ row: 4, col: 6 },
+			{ row: 6, col: 4 },
 			{ row: 7, col: 5 }
 		]
 	},
@@ -97,12 +106,16 @@ const levels = [
 		mission: 'Final level: collect all jugs and guide water through a narrow safe route.',
 		fact: 'Clean water projects can transform health, education, and local economies.',
 		blockedCells: [
+			{ row: 0, col: 4 },
 			{ row: 1, col: 4 },
 			{ row: 2, col: 1 },
+			{ row: 2, col: 5 },
 			{ row: 3, col: 5 },
 			{ row: 5, col: 2 },
+			{ row: 5, col: 6 },
 			{ row: 6, col: 6 },
-			{ row: 7, col: 3 }
+			{ row: 7, col: 3 },
+			{ row: 8, col: 2 }
 		],
 		jugCells: [
 			{ row: 1, col: 2 },
@@ -111,17 +124,40 @@ const levels = [
 			{ row: 8, col: 5 }
 		],
 		dirtyWaterCells: [
+			{ row: 1, col: 6 },
 			{ row: 2, col: 6 },
+			{ row: 3, col: 2 },
 			{ row: 4, col: 3 },
+			{ row: 6, col: 1 },
+			{ row: 6, col: 5 },
 			{ row: 7, col: 1 }
 		]
 	}
 ];
 
+const difficultyConfigs = {
+	easy: {
+		label: 'Easy',
+		blockedMultiplier: 0.6,
+		dirtyMultiplier: 0.55
+	},
+	medium: {
+		label: 'Medium',
+		blockedMultiplier: 0.8,
+		dirtyMultiplier: 0.8
+	},
+	hard: {
+		label: 'Hard',
+		blockedMultiplier: 1,
+		dirtyMultiplier: 1
+	}
+};
+
 const boardElement = document.getElementById('game-board');
 const gamePage = document.querySelector('.game-page');
 const gameTitle = document.querySelector('.game-title');
 const levelList = document.getElementById('level-list');
+const difficultyButtons = document.querySelectorAll('.difficulty-btn');
 const levelFact = document.getElementById('level-fact');
 const levelMission = document.getElementById('level-mission');
 const topChrome = document.querySelector('.top-chrome');
@@ -152,6 +188,51 @@ let confettiTimeoutId = null;
 let isGameOver = false;
 let currentLevelIndex = 0;
 let highestUnlockedLevelIndex = 0;
+let currentDifficulty = 'medium';
+let levels = buildLevelsForDifficulty(currentDifficulty);
+
+function buildLevelsForDifficulty(difficultyKey) {
+	const config = difficultyConfigs[difficultyKey] || difficultyConfigs.medium;
+	const includeDirtyWater = difficultyKey === 'medium' || difficultyKey === 'hard';
+
+	return baseLevels.map((level) => {
+		const blockedCount = Math.max(1, Math.round(level.blockedCells.length * config.blockedMultiplier));
+		const dirtyCount = includeDirtyWater
+			? Math.max(1, Math.round(level.dirtyWaterCells.length * config.dirtyMultiplier))
+			: 0;
+
+		return {
+			...level,
+			blockedCells: level.blockedCells.slice(0, blockedCount),
+			dirtyWaterCells: level.dirtyWaterCells.slice(0, dirtyCount),
+			jugCells: [...level.jugCells]
+		};
+	});
+}
+
+function updateDifficultyButtons() {
+	for (let index = 0; index < difficultyButtons.length; index++) {
+		const button = difficultyButtons[index];
+		const isCurrent = button.dataset.difficulty === currentDifficulty;
+
+		button.classList.toggle('current', isCurrent);
+		button.setAttribute('aria-pressed', isCurrent ? 'true' : 'false');
+	}
+}
+
+function setDifficulty(difficultyKey) {
+	if (!difficultyConfigs[difficultyKey] || difficultyKey === currentDifficulty) {
+		return;
+	}
+
+	currentDifficulty = difficultyKey;
+	levels = buildLevelsForDifficulty(currentDifficulty);
+	currentLevelIndex = 0;
+	highestUnlockedLevelIndex = 0;
+	updateDifficultyButtons();
+	resetGame();
+	statusMessage.textContent = `${difficultyConfigs[currentDifficulty].label} mode selected. Complete levels to unlock more.`;
+}
 
 function getCurrentLevel() {
 	return levels[currentLevelIndex];
@@ -163,7 +244,7 @@ function updateLevelPanel() {
 
 	levelFact.textContent = level.fact;
 	levelMission.textContent = level.mission;
-	gameTitle.textContent = `One Drop at a Time - Level ${levelNumber}`;
+	gameTitle.textContent = `One Drop at a Time - Level ${levelNumber} (${difficultyConfigs[currentDifficulty].label})`;
 	updateLevelListDisplay();
 }
 
@@ -766,7 +847,17 @@ resetButton.addEventListener('click', resetGame);
 victoryPlayAgainButton.addEventListener('click', advanceToNextLevel);
 lossPlayAgainButton.addEventListener('click', resetGame);
 
+for (let index = 0; index < difficultyButtons.length; index++) {
+	const button = difficultyButtons[index];
+
+	button.addEventListener('click', () => {
+		const difficultyKey = button.dataset.difficulty;
+		setDifficulty(difficultyKey);
+	});
+}
+
 window.addEventListener('resize', fitBoardToViewport);
 window.visualViewport?.addEventListener('resize', fitBoardToViewport);
 
+updateDifficultyButtons();
 resetGame();
