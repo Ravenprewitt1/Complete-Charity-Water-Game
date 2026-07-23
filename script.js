@@ -4,30 +4,126 @@ const cols = 8;
 const sourceCell = { row: 0, col: 0 };
 const goalCell = { row: rows - 1, col: cols - 1 };
 
-const blockedCells = [
-	{ row: 2, col: 4 },
-	{ row: 3, col: 4 },
-	{ row: 4, col: 1 },
-	{ row: 6, col: 6 },
-	{ row: 7, col: 2 }
-];
-
-const jugCells = [
-	{ row: 1, col: 2 },
-	{ row: 3, col: 6 },
-	{ row: 5, col: 3 },
-	{ row: 8, col: 5 }
-];
-
-const dirtyWaterCells = [
-	{ row: 2, col: 1 },
-	{ row: 4, col: 6 },
-	{ row: 6, col: 3 }
+const levels = [
+	{
+		mission: 'Build a safe beginner path to the tank while collecting all 4 jugs.',
+		fact: '771 million people still live without clean water close to home.',
+		blockedCells: [
+			{ row: 2, col: 4 },
+			{ row: 3, col: 4 },
+			{ row: 4, col: 1 },
+			{ row: 6, col: 6 },
+			{ row: 7, col: 2 }
+		],
+		jugCells: [
+			{ row: 1, col: 2 },
+			{ row: 3, col: 6 },
+			{ row: 5, col: 3 },
+			{ row: 8, col: 5 }
+		],
+		dirtyWaterCells: [
+			{ row: 2, col: 1 },
+			{ row: 4, col: 6 },
+			{ row: 6, col: 3 }
+		]
+	},
+	{
+		mission: 'Plan around new rock blocks and keep water away from dirty pockets.',
+		fact: 'Access to clean water can reduce waterborne diseases and save lives every day.',
+		blockedCells: [
+			{ row: 1, col: 4 },
+			{ row: 2, col: 4 },
+			{ row: 3, col: 2 },
+			{ row: 5, col: 5 },
+			{ row: 7, col: 1 }
+		],
+		jugCells: [
+			{ row: 1, col: 1 },
+			{ row: 2, col: 6 },
+			{ row: 6, col: 2 },
+			{ row: 8, col: 4 }
+		],
+		dirtyWaterCells: [
+			{ row: 3, col: 5 },
+			{ row: 5, col: 2 },
+			{ row: 7, col: 6 }
+		]
+	},
+	{
+		mission: 'Use careful turns to collect every jug before reaching the tank.',
+		fact: 'When communities get clean water, kids can spend more time in school.',
+		blockedCells: [
+			{ row: 1, col: 2 },
+			{ row: 2, col: 2 },
+			{ row: 4, col: 5 },
+			{ row: 6, col: 4 },
+			{ row: 7, col: 6 }
+		],
+		jugCells: [
+			{ row: 1, col: 5 },
+			{ row: 3, col: 1 },
+			{ row: 5, col: 6 },
+			{ row: 8, col: 2 }
+		],
+		dirtyWaterCells: [
+			{ row: 2, col: 6 },
+			{ row: 4, col: 2 },
+			{ row: 7, col: 4 }
+		]
+	},
+	{
+		mission: 'Create a zigzag tunnel to dodge rock walls and protect clean water.',
+		fact: 'Women and girls spend an estimated 200 million hours each day collecting water.',
+		blockedCells: [
+			{ row: 1, col: 3 },
+			{ row: 2, col: 3 },
+			{ row: 3, col: 3 },
+			{ row: 5, col: 6 },
+			{ row: 6, col: 1 }
+		],
+		jugCells: [
+			{ row: 1, col: 6 },
+			{ row: 4, col: 2 },
+			{ row: 6, col: 5 },
+			{ row: 8, col: 3 }
+		],
+		dirtyWaterCells: [
+			{ row: 2, col: 1 },
+			{ row: 4, col: 6 },
+			{ row: 7, col: 5 }
+		]
+	},
+	{
+		mission: 'Final level: collect all jugs and guide water through a narrow safe route.',
+		fact: 'Clean water projects can transform health, education, and local economies.',
+		blockedCells: [
+			{ row: 1, col: 4 },
+			{ row: 2, col: 1 },
+			{ row: 3, col: 5 },
+			{ row: 5, col: 2 },
+			{ row: 6, col: 6 },
+			{ row: 7, col: 3 }
+		],
+		jugCells: [
+			{ row: 1, col: 2 },
+			{ row: 3, col: 6 },
+			{ row: 6, col: 4 },
+			{ row: 8, col: 5 }
+		],
+		dirtyWaterCells: [
+			{ row: 2, col: 6 },
+			{ row: 4, col: 3 },
+			{ row: 7, col: 1 }
+		]
+	}
 ];
 
 const boardElement = document.getElementById('game-board');
 const gamePage = document.querySelector('.game-page');
 const gameTitle = document.querySelector('.game-title');
+const levelList = document.getElementById('level-list');
+const levelFact = document.getElementById('level-fact');
+const levelMission = document.getElementById('level-mission');
 const topChrome = document.querySelector('.top-chrome');
 const boardPanel = document.querySelector('.board-panel');
 const hud = document.querySelector('.hud');
@@ -54,30 +150,89 @@ let isDragging = false;
 let collectedJugCount = 0;
 let confettiTimeoutId = null;
 let isGameOver = false;
+let currentLevelIndex = 0;
+let highestUnlockedLevelIndex = 0;
+
+function getCurrentLevel() {
+	return levels[currentLevelIndex];
+}
+
+function updateLevelPanel() {
+	const level = getCurrentLevel();
+	const levelNumber = currentLevelIndex + 1;
+
+	levelFact.textContent = level.fact;
+	levelMission.textContent = level.mission;
+	gameTitle.textContent = `One Drop at a Time - Level ${levelNumber}`;
+	updateLevelListDisplay();
+}
+
+function updateLevelListDisplay() {
+	if (!levelList) {
+		return;
+	}
+
+	levelList.innerHTML = '';
+
+	for (let index = 0; index < levels.length; index++) {
+		const levelPill = document.createElement('button');
+		const levelNumber = index + 1;
+		const isCurrent = index === currentLevelIndex;
+		const isUnlocked = index <= highestUnlockedLevelIndex;
+
+		levelPill.className = 'level-pill';
+		levelPill.type = 'button';
+		levelPill.textContent = `Level ${levelNumber}`;
+		levelPill.disabled = !isUnlocked;
+		levelPill.setAttribute('aria-current', isCurrent ? 'true' : 'false');
+
+		if (isUnlocked) {
+			levelPill.addEventListener('click', () => {
+				goToLevel(index);
+			});
+		}
+
+		if (isCurrent) {
+			levelPill.classList.add('current');
+		}
+
+		if (!isUnlocked) {
+			levelPill.classList.add('locked');
+		}
+
+		levelList.appendChild(levelPill);
+	}
+}
+
+function goToLevel(levelIndex) {
+	if (levelIndex < 0 || levelIndex >= levels.length) {
+		return;
+	}
+
+	if (levelIndex > highestUnlockedLevelIndex) {
+		statusMessage.textContent = `Beat Level ${highestUnlockedLevelIndex + 1} to unlock more levels.`;
+		return;
+	}
+
+	currentLevelIndex = levelIndex;
+	resetGame();
+}
 
 function fitBoardToViewport() {
 	if (!gamePage || !gameTitle || !topChrome || !boardPanel || !hud) {
 		return;
 	}
 
-	const viewportWidth = window.innerWidth;
-	const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-	const pageStyles = window.getComputedStyle(gamePage);
 	const boardPanelStyles = window.getComputedStyle(boardPanel);
-	const bodyStyles = window.getComputedStyle(document.body);
-	const titleHeight = gameTitle.getBoundingClientRect().height;
-	const topChromeHeight = topChrome.getBoundingClientRect().height;
-	const hudHeight = hud.getBoundingClientRect().height;
-	const pagePaddingX = parseFloat(pageStyles.paddingLeft) + parseFloat(pageStyles.paddingRight);
-	const pagePaddingY = parseFloat(pageStyles.paddingTop) + parseFloat(pageStyles.paddingBottom);
 	const boardPanelPaddingX = parseFloat(boardPanelStyles.paddingLeft) + parseFloat(boardPanelStyles.paddingRight);
 	const boardPanelPaddingY = parseFloat(boardPanelStyles.paddingTop) + parseFloat(boardPanelStyles.paddingBottom);
-	const bodyPaddingX = parseFloat(bodyStyles.paddingLeft) + parseFloat(bodyStyles.paddingRight);
-	const bodyPaddingY = parseFloat(bodyStyles.paddingTop) + parseFloat(bodyStyles.paddingBottom);
-	const availableWidth = viewportWidth - bodyPaddingX - pagePaddingX - boardPanelPaddingX - 8;
-	const availableHeight = viewportHeight - bodyPaddingY - pagePaddingY - titleHeight - topChromeHeight - hudHeight - boardPanelPaddingY - 48;
-	const maxCellWidth = Math.floor(availableWidth / cols);
-	const maxCellHeight = Math.floor(availableHeight / rows);
+	const boardPanelRect = boardPanel.getBoundingClientRect();
+	const panelInnerWidth = Math.max(0, boardPanelRect.width - boardPanelPaddingX);
+	const panelInnerHeight = Math.max(0, boardPanelRect.height - boardPanelPaddingY);
+	const boardHorizontalExtras = (cols - 1) + 8;
+	const boardVerticalExtras = (rows - 1) + 8;
+	const maxCellWidth = Math.floor((panelInnerWidth - boardHorizontalExtras) / cols);
+	const maxCellHeight = Math.floor((panelInnerHeight - boardVerticalExtras) / rows);
 	const preferredCellSize = Math.min(maxCellWidth, maxCellHeight, 88);
 	const safeCellSize = Math.max(28, preferredCellSize);
 
@@ -147,8 +302,12 @@ function launchConfetti() {
 }
 
 function showVictoryScreen() {
-	victoryMessage.textContent = 'You filled the tank one drop at a time.';
-	victoryJugs.textContent = `Jugs collected: ${collectedJugCount}/${jugCells.length}`;
+	const level = getCurrentLevel();
+	const isFinalLevel = currentLevelIndex === levels.length - 1;
+
+	victoryMessage.textContent = `Level ${currentLevelIndex + 1} complete! ${level.mission}`;
+	victoryJugs.textContent = `Jugs collected: ${collectedJugCount}/${level.jugCells.length}`;
+	victoryPlayAgainButton.textContent = isFinalLevel ? 'Play From Level 1' : 'Next Level';
 	victoryOverlay.classList.add('is-visible');
 	victoryOverlay.setAttribute('aria-hidden', 'false');
 	launchConfetti();
@@ -200,6 +359,11 @@ function loseGame(message) {
 }
 
 function createBoardData() {
+	const level = getCurrentLevel();
+	const blockedCells = level.blockedCells;
+	const jugCells = level.jugCells;
+	const dirtyWaterCells = level.dirtyWaterCells;
+
 	board = [];
 
 	for (let row = 0; row < rows; row++) {
@@ -477,6 +641,11 @@ function fillTankToComplete() {
 		if (progressValue >= 100) {
 			clearInterval(tankFillIntervalId);
 			tankFillIntervalId = null;
+			highestUnlockedLevelIndex = Math.max(
+				highestUnlockedLevelIndex,
+				Math.min(levels.length - 1, currentLevelIndex + 1)
+			);
+			updateLevelListDisplay();
 			statusMessage.textContent = 'Success! The tank is full.';
 			startButton.disabled = true;
 			showVictoryScreen();
@@ -518,10 +687,22 @@ function resetGame() {
 	hideLossScreen();
 	startButton.disabled = false;
 	setProgress(0);
+	updateLevelPanel();
 	createBoardData();
 	renderBoard();
 	fitBoardToViewport();
-	statusMessage.textContent = 'Dig a path, then start the water.';
+	statusMessage.textContent = `Level ${currentLevelIndex + 1}: ${getCurrentLevel().mission}`;
+}
+
+function advanceToNextLevel() {
+	const nextLevelIndex = (currentLevelIndex + 1) % levels.length;
+
+	if (nextLevelIndex > highestUnlockedLevelIndex) {
+		return;
+	}
+
+	currentLevelIndex = nextLevelIndex;
+	resetGame();
 }
 
 boardElement.addEventListener('pointerdown', (event) => {
@@ -582,7 +763,7 @@ boardElement.addEventListener('click', (event) => {
 
 startButton.addEventListener('click', startWaterFlow);
 resetButton.addEventListener('click', resetGame);
-victoryPlayAgainButton.addEventListener('click', resetGame);
+victoryPlayAgainButton.addEventListener('click', advanceToNextLevel);
 lossPlayAgainButton.addEventListener('click', resetGame);
 
 window.addEventListener('resize', fitBoardToViewport);

@@ -7,8 +7,21 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <main class="game-page">
-        <h1 class="game-title">One Drop at a Time</h1>
+    <div class="page-layout">
+        <aside class="info-panel" aria-label="Water facts and mission">
+            <div class="level-list-wrap" aria-label="All levels">
+                <p class="level-list-title">All Levels</p>
+                <div id="level-list" class="level-list"></div>
+            </div>
+            <h2 class="panel-title">Water Facts</h2>
+            <p id="level-fact" class="panel-fact">Every clean water path helps a community stay healthy.</p>
+
+            <h2 class="panel-title">Mission</h2>
+            <p id="level-mission" class="panel-mission">Dig a safe path from the spring to the tank.</p>
+        </aside>
+
+        <main class="game-page">
+            <h1 class="game-title">One Drop at a Time</h1>
 
         <section class="top-chrome" aria-label="Top game controls">
             <div class="star-tracker" aria-label="Star tracker">
@@ -39,24 +52,32 @@
             <p id="status-message" class="status-message">Dig a path, then start the water.</p>
         </section>
 
-        <section id="victory-overlay" class="victory-overlay" aria-live="polite" aria-hidden="true">
+            <section id="victory-overlay" class="victory-overlay" aria-live="polite" aria-hidden="true">
             <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
             <div class="victory-card" role="dialog" aria-modal="true" aria-labelledby="victory-title">
                 <h2 id="victory-title">Victory!</h2>
                 <p id="victory-message">You filled the tank one drop at a time.</p>
                 <p id="victory-jugs" class="victory-jugs">Jugs collected: 0/0</p>
-                <button id="victory-play-again" type="button">Play Again</button>
+                <button id="victory-play-again" type="button">Next Level</button>
             </div>
         </section>
 
-        <section id="loss-overlay" class="loss-overlay" aria-live="polite" aria-hidden="true">
+            <section id="loss-overlay" class="loss-overlay" aria-live="polite" aria-hidden="true">
             <div class="loss-card" role="dialog" aria-modal="true" aria-labelledby="loss-title">
                 <h2 id="loss-title">You Lost</h2>
                 <p id="loss-message">Your water touched dirty water.</p>
                 <button id="loss-play-again" type="button">Try Again</button>
             </div>
         </section>
-    </main>
+        </main>
+
+        <aside class="support-panel" aria-label="Charity water links">
+            <h2 class="support-title">Support Clean Water</h2>
+            <p class="footer-copy">Learn more and support clean water:</p>
+            <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">charity: water website</a>
+            <a href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer">Donate</a>
+        </aside>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
