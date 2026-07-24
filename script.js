@@ -1,5 +1,7 @@
 const rows = 10;
 const cols = 8;
+const HARD_WATER_ROUTE_LIMIT = 24;
+const HARD_WATER_ROUTE_BUFFER = 7;
 
 const sourceCell = { row: 0, col: 0 };
 const goalCell = { row: rows - 1, col: cols - 1 };
@@ -191,6 +193,7 @@ let highestUnlockedLevelIndex = 0;
 let currentDifficulty = 'medium';
 let levels = buildLevelsForDifficulty(currentDifficulty);
 let lastAppliedCellSize = null;
+let currentHardRouteLimit = HARD_WATER_ROUTE_LIMIT;
 
 function buildLevelsForDifficulty(difficultyKey) {
 	const config = difficultyConfigs[difficultyKey] || difficultyConfigs.medium;
@@ -209,6 +212,195 @@ function buildLevelsForDifficulty(difficultyKey) {
 			jugCells: [...level.jugCells]
 		};
 	});
+}
+
+function isInsideBoard(row, col) {
+	return row >= 0 && row < rows && col >= 0 && col < cols;
+}
+
+function getCellKey(row, col) {
+	return `${row}-${col}`;
+}
+
+function buildBlockedSet(level) {
+	const blockedSet = new Set();
+
+	for (let index = 0; index < level.blockedCells.length; index++) {
+		const blocked = level.blockedCells[index];
+		blockedSet.add(getCellKey(blocked.row, blocked.col));
+	}
+
+	return blockedSet;
+}
+
+function buildDirtySet(level) {
+	const dirtySet = new Set();
+
+	for (let index = 0; index < level.dirtyWaterCells.length; index++) {
+		const dirty = level.dirtyWaterCells[index];
+		dirtySet.add(getCellKey(dirty.row, dirty.col));
+	}
+
+	return dirtySet;
+}
+
+function isWalkableForHardRoute(level, row, col, blockedSet, dirtySet) {
+	if (!isInsideBoard(row, col)) {
+		return false;
+	}
+
+	if (isSameCell({ row, col }, sourceCell) || isSameCell({ row, col }, goalCell)) {
+		return true;
+	}
+
+	const key = getCellKey(row, col);
+
+	if (blockedSet.has(key) || dirtySet.has(key)) {
+		return false;
+	}
+
+	return true;
+}
+
+function shortestDistanceBetweenCells(start, target, level, blockedSet, dirtySet) {
+	const queue = [{ row: start.row, col: start.col, distance: 0 }];
+	const visited = new Set([getCellKey(start.row, start.col)]);
+
+	while (queue.length > 0) {
+		const current = queue.shift();
+
+		if (current.row === target.row && current.col === target.col) {
+			return current.distance;
+		}
+
+		const directions = [
+			{ rowChange: 1, colChange: 0 },
+			{ rowChange: -1, colChange: 0 },
+			{ rowChange: 0, colChange: 1 },
+			{ rowChange: 0, colChange: -1 }
+		];
+
+		for (let index = 0; index < directions.length; index++) {
+			const direction = directions[index];
+			const nextRow = current.row + direction.rowChange;
+			const nextCol = current.col + direction.colChange;
+			const nextKey = getCellKey(nextRow, nextCol);
+
+			if (visited.has(nextKey)) {
+				continue;
+			}
+
+			if (!isWalkableForHardRoute(level, nextRow, nextCol, blockedSet, dirtySet)) {
+				continue;
+			}
+
+			visited.add(nextKey);
+			queue.push({ row: nextRow, col: nextCol, distance: current.distance + 1 });
+		}
+	}
+
+	return Number.POSITIVE_INFINITY;
+}
+
+function calculateShortestJugRouteLength(level) {
+	const blockedSet = buildBlockedSet(level);
+	const dirtySet = buildDirtySet(level);
+	const jugPoints = [...level.jugCells];
+
+	if (jugPoints.length === 0) {
+		return shortestDistanceBetweenCells(sourceCell, goalCell, level, blockedSet, dirtySet);
+	}
+
+	const points = [sourceCell, ...jugPoints, goalCell];
+	const pointCount = points.length;
+	const distances = Array.from({ length: pointCount }, () => Array(pointCount).fill(Number.POSITIVE_INFINITY));
+
+	for (let rowIndex = 0; rowIndex < pointCount; rowIndex++) {
+		for (let colIndex = 0; colIndex < pointCount; colIndex++) {
+			if (rowIndex === colIndex) {
+				distances[rowIndex][colIndex] = 0;
+				continue;
+			}
+
+			distances[rowIndex][colIndex] = shortestDistanceBetweenCells(
+				points[rowIndex],
+				points[colIndex],
+				level,
+				blockedSet,
+				dirtySet
+			);
+		}
+	}
+
+	const jugCount = jugPoints.length;
+	const fullMask = (1 << jugCount) - 1;
+	const dp = Array.from({ length: 1 << jugCount }, () => Array(jugCount).fill(Number.POSITIVE_INFINITY));
+
+	for (let jugIndex = 0; jugIndex < jugCount; jugIndex++) {
+		const distanceFromSource = distances[0][jugIndex + 1];
+
+		if (Number.isFinite(distanceFromSource)) {
+			dp[1 << jugIndex][jugIndex] = distanceFromSource;
+		}
+	}
+
+	for (let mask = 1; mask <= fullMask; mask++) {
+		for (let lastJugIndex = 0; lastJugIndex < jugCount; lastJugIndex++) {
+			const currentDistance = dp[mask][lastJugIndex];
+
+			if (!Number.isFinite(currentDistance)) {
+				continue;
+			}
+
+			for (let nextJugIndex = 0; nextJugIndex < jugCount; nextJugIndex++) {
+				if ((mask & (1 << nextJugIndex)) !== 0) {
+					continue;
+				}
+
+				const toNextDistance = distances[lastJugIndex + 1][nextJugIndex + 1];
+
+				if (!Number.isFinite(toNextDistance)) {
+					continue;
+				}
+
+				const nextMask = mask | (1 << nextJugIndex);
+				const candidateDistance = currentDistance + toNextDistance;
+
+				dp[nextMask][nextJugIndex] = Math.min(dp[nextMask][nextJugIndex], candidateDistance);
+			}
+		}
+	}
+
+	let shortestRoute = Number.POSITIVE_INFINITY;
+
+	for (let lastJugIndex = 0; lastJugIndex < jugCount; lastJugIndex++) {
+		const pathToLastJug = dp[fullMask][lastJugIndex];
+		const distanceToGoal = distances[lastJugIndex + 1][jugCount + 1];
+
+		if (!Number.isFinite(pathToLastJug) || !Number.isFinite(distanceToGoal)) {
+			continue;
+		}
+
+		shortestRoute = Math.min(shortestRoute, pathToLastJug + distanceToGoal);
+	}
+
+	return shortestRoute;
+}
+
+function updateHardRouteLimitForCurrentLevel() {
+	if (currentDifficulty !== 'hard') {
+		currentHardRouteLimit = HARD_WATER_ROUTE_LIMIT;
+		return;
+	}
+
+	const shortestJugRouteLength = calculateShortestJugRouteLength(getCurrentLevel());
+
+	if (!Number.isFinite(shortestJugRouteLength)) {
+		currentHardRouteLimit = HARD_WATER_ROUTE_LIMIT;
+		return;
+	}
+
+	currentHardRouteLimit = Math.max(HARD_WATER_ROUTE_LIMIT, shortestJugRouteLength + HARD_WATER_ROUTE_BUFFER);
 }
 
 function updateDifficultyButtons() {
@@ -232,7 +424,21 @@ function setDifficulty(difficultyKey) {
 	highestUnlockedLevelIndex = 0;
 	updateDifficultyButtons();
 	resetGame();
+
+	if (currentDifficulty === 'hard') {
+		statusMessage.textContent = `Hard mode selected. Max route length: ${currentHardRouteLimit} cells.`;
+		return;
+	}
+
 	statusMessage.textContent = `${difficultyConfigs[currentDifficulty].label} mode selected. Complete levels to unlock more.`;
+}
+
+function getWaterRouteLimit() {
+	if (currentDifficulty === 'hard') {
+		return currentHardRouteLimit;
+	}
+
+	return Number.POSITIVE_INFINITY;
 }
 
 function getCurrentLevel() {
@@ -245,7 +451,7 @@ function updateLevelPanel() {
 
 	levelFact.textContent = level.fact;
 	levelMission.textContent = level.mission;
-	gameTitle.textContent = `Clean Water Pipeline - Level ${levelNumber} (${difficultyConfigs[currentDifficulty].label})`;
+	gameTitle.textContent = `One Drop at a Time - Level ${levelNumber} (${difficultyConfigs[currentDifficulty].label})`;
 	updateLevelListDisplay();
 }
 
@@ -688,6 +894,7 @@ function animateWater(path) {
 	renderBoard();
 
 	let step = 0;
+	const routeLimit = getWaterRouteLimit();
 
 	if (waterIntervalId) {
 		clearInterval(waterIntervalId);
@@ -695,6 +902,12 @@ function animateWater(path) {
 
 	waterIntervalId = setInterval(() => {
 		if (step < path.length) {
+			if (step >= routeLimit) {
+				renderBoard();
+				loseGame(`Mission failed. Water ran out after ${routeLimit} cells in hard mode.`);
+				return;
+			}
+
 			const point = path[step];
 			collectJugAt(point.row, point.col);
 			board[point.row][point.col].hasWater = true;
@@ -775,6 +988,7 @@ function resetGame() {
 	startButton.disabled = false;
 	setProgress(0);
 	updateLevelPanel();
+	updateHardRouteLimitForCurrentLevel();
 	fitBoardToViewport();
 	createBoardData();
 	renderBoard();
