@@ -6,7 +6,7 @@ const goalCell = { row: rows - 1, col: cols - 1 };
 
 const baseLevels = [
 	{
-		mission: 'Build a safe beginner path to the tank while collecting all 4 jugs.',
+		mission: 'Build a safe introductory route to the reservoir while collecting all four jugs.',
 		fact: '771 million people still live without clean water close to home.',
 		blockedCells: [
 			{ row: 3, col: 4 },
@@ -25,7 +25,7 @@ const baseLevels = [
 		]
 	},
 	{
-		mission: 'Plan around new rock blocks and keep water away from dirty pockets.',
+		mission: 'Plan around new rock barriers and keep clean water away from contamination pockets.',
 		fact: 'Access to clean water can reduce waterborne diseases and save lives every day.',
 		blockedCells: [
 			{ row: 0, col: 4 },
@@ -49,7 +49,7 @@ const baseLevels = [
 		]
 	},
 	{
-		mission: 'Use careful turns to collect every jug before reaching the tank.',
+		mission: 'Use careful turns to collect every jug before reaching the reservoir.',
 		fact: 'When communities get clean water, kids can spend more time in school.',
 		blockedCells: [
 			{ row: 0, col: 2 },
@@ -75,7 +75,7 @@ const baseLevels = [
 		]
 	},
 	{
-		mission: 'Create a zigzag tunnel to dodge rock walls and protect clean water.',
+		mission: 'Create a zigzag tunnel to navigate rock walls and protect clean water.',
 		fact: 'Women and girls spend an estimated 200 million hours each day collecting water.',
 		blockedCells: [
 			{ row: 0, col: 3 },
@@ -103,7 +103,7 @@ const baseLevels = [
 		]
 	},
 	{
-		mission: 'Final level: collect all jugs and guide water through a narrow safe route.',
+		mission: 'Final level: collect all jugs and guide water through a narrow, safe route.',
 		fact: 'Clean water projects can transform health, education, and local economies.',
 		blockedCells: [
 			{ row: 0, col: 4 },
@@ -231,7 +231,7 @@ function setDifficulty(difficultyKey) {
 	highestUnlockedLevelIndex = 0;
 	updateDifficultyButtons();
 	resetGame();
-	statusMessage.textContent = `${difficultyConfigs[currentDifficulty].label} mode selected. Complete levels to unlock more.`;
+	statusMessage.textContent = `${difficultyConfigs[currentDifficulty].label} mode selected. Complete levels to unlock the full campaign.`;
 }
 
 function getCurrentLevel() {
@@ -244,7 +244,7 @@ function updateLevelPanel() {
 
 	levelFact.textContent = level.fact;
 	levelMission.textContent = level.mission;
-	gameTitle.textContent = `One Drop at a Time - Level ${levelNumber} (${difficultyConfigs[currentDifficulty].label})`;
+	gameTitle.textContent = `Clean Water Pipeline - Level ${levelNumber} (${difficultyConfigs[currentDifficulty].label})`;
 	updateLevelListDisplay();
 }
 
@@ -291,7 +291,7 @@ function goToLevel(levelIndex) {
 	}
 
 	if (levelIndex > highestUnlockedLevelIndex) {
-		statusMessage.textContent = `Beat Level ${highestUnlockedLevelIndex + 1} to unlock more levels.`;
+		statusMessage.textContent = `Complete Level ${highestUnlockedLevelIndex + 1} to unlock additional levels.`;
 		return;
 	}
 
@@ -344,7 +344,7 @@ function collectJugAt(row, col) {
 	cell.hasJug = false;
 	collectedJugCount = Math.min(starElements.length, collectedJugCount + 1);
 	updateStarTracker();
-	statusMessage.textContent = `Water collected a jug! Stars: ${collectedJugCount}/${starElements.length}`;
+	statusMessage.textContent = `Jug secured. Stars: ${collectedJugCount}/${starElements.length}`;
 	return true;
 }
 
@@ -386,9 +386,9 @@ function showVictoryScreen() {
 	const level = getCurrentLevel();
 	const isFinalLevel = currentLevelIndex === levels.length - 1;
 
-	victoryMessage.textContent = `Level ${currentLevelIndex + 1} complete! ${level.mission}`;
+	victoryMessage.textContent = `Level ${currentLevelIndex + 1} complete. ${level.mission}`;
 	victoryJugs.textContent = `Jugs collected: ${collectedJugCount}/${level.jugCells.length}`;
-	victoryPlayAgainButton.textContent = isFinalLevel ? 'Play From Level 1' : 'Next Level';
+	victoryPlayAgainButton.textContent = isFinalLevel ? 'Restart From Level 1' : 'Next Level';
 	victoryOverlay.classList.add('is-visible');
 	victoryOverlay.setAttribute('aria-hidden', 'false');
 	launchConfetti();
@@ -575,12 +575,12 @@ function digCell(row, col) {
 	}
 
 	if (isGameOver) {
-		statusMessage.textContent = 'Round over. Press Reset or Try Again.';
+		statusMessage.textContent = 'Round complete. Restart the level to play again.';
 		return;
 	}
 
 	if (waterStarted) {
-		statusMessage.textContent = 'Water is flowing. Press Reset to dig again.';
+		statusMessage.textContent = 'Water is currently flowing. Restart the level to continue digging.';
 		return;
 	}
 
@@ -588,11 +588,11 @@ function digCell(row, col) {
 		cell.type = 'tunnel';
 
 		if (cell.hasJug) {
-			statusMessage.textContent = 'Jug uncovered! Route water through it to collect the jug.';
+			statusMessage.textContent = 'Jug uncovered. Route water through this cell to collect it.';
 		} else if (cell.hasDirtyWater) {
-			statusMessage.textContent = 'Dirty water pocket found. Keep clean water away from it!';
+			statusMessage.textContent = 'Contamination pocket identified. Keep clean water away from this area.';
 		} else {
-			statusMessage.textContent = 'Nice! Keep digging a path to the green tank.';
+			statusMessage.textContent = 'Route improved. Continue digging toward the green reservoir.';
 		}
 
 	}
@@ -671,7 +671,7 @@ function animateWater(path) {
 	}
 
 	if (!path || path.length === 0) {
-		statusMessage.textContent = 'No path found. Dig more tunnels from blue spring to green tank.';
+		statusMessage.textContent = 'No valid route found. Dig more tunnels from the blue spring to the green reservoir.';
 		waterStarted = false;
 		return;
 	}
@@ -695,7 +695,7 @@ function animateWater(path) {
 
 			if (board[point.row][point.col].hasDirtyWater) {
 				renderBoard();
-				loseGame('You lost! Clean water touched a dirty water pocket.');
+				loseGame('Mission failed. Clean water reached a contamination pocket.');
 				return;
 			}
 
@@ -715,7 +715,7 @@ function fillTankToComplete() {
 		return;
 	}
 
-	statusMessage.textContent = 'Water reached the tank. Filling up...';
+	statusMessage.textContent = 'Water reached the reservoir. Filling now...';
 	setProgress(0);
 
 	tankFillIntervalId = setInterval(() => {
@@ -727,7 +727,7 @@ function fillTankToComplete() {
 				Math.min(levels.length - 1, currentLevelIndex + 1)
 			);
 			updateLevelListDisplay();
-			statusMessage.textContent = 'Success! The tank is full.';
+			statusMessage.textContent = 'Success. The reservoir is full.';
 			startButton.disabled = true;
 			showVictoryScreen();
 			return;
@@ -743,7 +743,7 @@ function startWaterFlow() {
 	}
 
 	waterStarted = true;
-	statusMessage.textContent = 'Water started!';
+	statusMessage.textContent = 'Water released.';
 
 	const path = findWaterPath();
 	animateWater(path);

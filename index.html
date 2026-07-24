@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Charity Water Game</title>
+    <title>Charity: Water Path Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -21,15 +24,15 @@
                 <p class="level-list-title">All Levels</p>
                 <div id="level-list" class="level-list"></div>
             </div>
-            <h2 class="panel-title">Water Facts</h2>
-            <p id="level-fact" class="panel-fact">Every clean water path helps a community stay healthy.</p>
+            <h2 class="panel-title">Global Water Fact</h2>
+            <p id="level-fact" class="panel-fact">Every reliable clean water source improves health, education, and local opportunity.</p>
 
-            <h2 class="panel-title">Mission</h2>
-            <p id="level-mission" class="panel-mission">Dig a safe path from the spring to the tank.</p>
+            <h2 class="panel-title">Level Objective</h2>
+            <p id="level-mission" class="panel-mission">Excavate a safe route from the spring to the reservoir.</p>
         </aside>
 
         <main class="game-page">
-            <h1 class="game-title">One Drop at a Time</h1>
+            <h1 class="game-title">Clean Water Pipeline</h1>
 
         <section class="top-chrome" aria-label="Top game controls">
             <div class="star-tracker" aria-label="Star tracker">
@@ -40,8 +43,8 @@
             </div>
 
             <div class="controls">
-                <button id="start-water" type="button">Start Water</button>
-                <button id="reset-game" type="button">Reset</button>
+                <button id="start-water" type="button">Release Water</button>
+                <button id="reset-game" type="button">Restart Level</button>
             </div>
         </section>
 
@@ -53,18 +56,18 @@
 
         <section class="hud" aria-label="Game progress and status">
             <div class="progress-wrap">
-                <label for="water-progress">Tank Fill Progress</label>
+                <label for="water-progress">Reservoir Fill Progress</label>
                 <progress id="water-progress" max="100" value="0"></progress>
             </div>
 
-            <p id="status-message" class="status-message">Dig a path, then start the water.</p>
+            <p id="status-message" class="status-message">Excavate a route, then release water.</p>
         </section>
 
             <section id="victory-overlay" class="victory-overlay" aria-live="polite" aria-hidden="true">
             <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
             <div class="victory-card" role="dialog" aria-modal="true" aria-labelledby="victory-title">
-                <h2 id="victory-title">Victory!</h2>
-                <p id="victory-message">You filled the tank one drop at a time.</p>
+                <h2 id="victory-title">Level Complete</h2>
+                <p id="victory-message">You successfully filled the reservoir.</p>
                 <p id="victory-jugs" class="victory-jugs">Jugs collected: 0/0</p>
                 <button id="victory-play-again" type="button">Next Level</button>
             </div>
@@ -72,17 +75,17 @@
 
             <section id="loss-overlay" class="loss-overlay" aria-live="polite" aria-hidden="true">
             <div class="loss-card" role="dialog" aria-modal="true" aria-labelledby="loss-title">
-                <h2 id="loss-title">You Lost</h2>
-                <p id="loss-message">Your water touched dirty water.</p>
-                <button id="loss-play-again" type="button">Try Again</button>
+                <h2 id="loss-title">Mission Failed</h2>
+                <p id="loss-message">Clean water was contaminated.</p>
+                <button id="loss-play-again" type="button">Retry Level</button>
             </div>
         </section>
         </main>
 
         <aside class="support-panel" aria-label="Charity water links">
-            <h2 class="support-title">Support Clean Water</h2>
-            <p class="footer-copy">Learn more and support clean water:</p>
-            <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">charity: water website</a>
+            <h2 class="support-title">Take Action</h2>
+            <p class="footer-copy">Explore charity: water and support clean water projects:</p>
+            <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">charity: water Website</a>
             <a href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer">Donate</a>
         </aside>
     </div>
