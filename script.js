@@ -190,6 +190,7 @@ let currentLevelIndex = 0;
 let highestUnlockedLevelIndex = 0;
 let currentDifficulty = 'medium';
 let levels = buildLevelsForDifficulty(currentDifficulty);
+let lastAppliedCellSize = null;
 
 function buildLevelsForDifficulty(difficultyKey) {
 	const config = difficultyConfigs[difficultyKey] || difficultyConfigs.medium;
@@ -231,7 +232,7 @@ function setDifficulty(difficultyKey) {
 	highestUnlockedLevelIndex = 0;
 	updateDifficultyButtons();
 	resetGame();
-	statusMessage.textContent = `${difficultyConfigs[currentDifficulty].label} mode selected. Complete levels to unlock the full campaign.`;
+	statusMessage.textContent = `${difficultyConfigs[currentDifficulty].label} mode selected. Complete levels to unlock more.`;
 }
 
 function getCurrentLevel() {
@@ -317,7 +318,12 @@ function fitBoardToViewport() {
 	const preferredCellSize = Math.min(maxCellWidth, maxCellHeight, 88);
 	const safeCellSize = Math.max(28, preferredCellSize);
 
+	if (safeCellSize === lastAppliedCellSize) {
+		return;
+	}
+
 	document.documentElement.style.setProperty('--cell-size', `${safeCellSize}px`);
+	lastAppliedCellSize = safeCellSize;
 }
 
 function isSameCell(a, b) {
@@ -769,9 +775,9 @@ function resetGame() {
 	startButton.disabled = false;
 	setProgress(0);
 	updateLevelPanel();
+	fitBoardToViewport();
 	createBoardData();
 	renderBoard();
-	fitBoardToViewport();
 	statusMessage.textContent = `Level ${currentLevelIndex + 1}: ${getCurrentLevel().mission}`;
 }
 

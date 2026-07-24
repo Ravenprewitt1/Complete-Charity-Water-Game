@@ -24,7 +24,7 @@ Secondary Colors:
 	--ink-muted: #4f6575;
 	--surface-cream: #fffdf5;
 	--surface-cloud: #f4fbff;
-	--side-panel-width: min(280px, 30vw);
+	--side-panel-width: clamp(180px, 22vw, 280px);
 	--cell-size: 64px;
 	--tunnel: #d6b892;
 	--water: #2E9DF7;
@@ -172,6 +172,8 @@ body {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 6px;
+	min-height: 64px;
+	align-content: flex-start;
 }
 
 .level-pill {
@@ -236,7 +238,7 @@ body {
 	box-shadow: 0 18px 38px rgba(22, 52, 71, 0.16);
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: clamp(6px, 1vh, 10px);
 	overflow: hidden;
 }
 
@@ -515,10 +517,14 @@ body {
 
 .status-message {
 	margin: 0;
-	min-height: 20px;
+	height: 1.1rem;
+	line-height: 1.1rem;
 	font-weight: 700;
 	font-size: 0.7rem;
 	color: #26495f;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .victory-overlay {
@@ -689,18 +695,18 @@ body {
 	cursor: pointer;
 }
 
-@media (max-width: 560px) {
-	.support-panel {
-		padding: 10px;
-		border-width: 3px;
-		border-radius: 14px;
+/* ─── Large screens (1400px+): give panels more breathing room ──────────── */
+@media (min-width: 1400px) {
+	:root {
+		--side-panel-width: clamp(280px, 18vw, 340px);
 	}
 
-	.support-panel a {
-		white-space: normal;
+	.page-layout {
+		gap: clamp(20px, 2.4vw, 32px);
 	}
 }
 
+/* ─── Stacked layout: panels stack above/below game card (≤1180px) ────── */
 @media (max-width: 1180px) {
 	body {
 		height: auto;
@@ -729,6 +735,33 @@ body {
 	}
 }
 
+/* ─── Tablet (≤768px): tighten spacing, full-width panels ──────────────── */
+@media (max-width: 768px) {
+	:root {
+		--cell-size: 52px;
+	}
+
+	.page-layout {
+		gap: clamp(8px, 2vw, 14px);
+	}
+
+	.info-panel,
+	.support-panel {
+		width: 100%;
+	}
+
+	.game-page {
+		width: 100%;
+		max-height: none;
+	}
+
+	.panel-fact,
+	.panel-mission {
+		font-size: 0.88rem;
+	}
+}
+
+/* ─── Small mobile (≤560px) ─────────────────────────────────────────────── */
 @media (max-width: 560px) {
 	:root {
 		--cell-size: 48px;
@@ -744,8 +777,16 @@ body {
 
 	.info-panel {
 		padding: 10px;
-		border-width: 3px;
 		border-radius: 14px;
+	}
+
+	.support-panel {
+		padding: 10px;
+		border-radius: 14px;
+	}
+
+	.support-panel a {
+		white-space: normal;
 	}
 
 	.panel-title {
@@ -759,11 +800,8 @@ body {
 	}
 
 	.game-page {
-		width: 100%;
 		padding: 8px;
 		border-radius: 16px;
-		border-width: 4px;
-		gap: 6px;
 	}
 
 	.game-title {
@@ -771,11 +809,7 @@ body {
 	}
 
 	.top-chrome {
-		justify-content: center;
-	}
-
-	.controls {
-		justify-content: center;
+		justify-content: space-between;
 	}
 
 	.controls button {
@@ -787,14 +821,16 @@ body {
 	}
 
 	.hud {
-		justify-content: center;
+		justify-content: space-between;
 	}
 
 	.status-message {
-		text-align: center;
+		text-align: right;
+		flex: 1;
 	}
 }
 
+/* ─── Very small phones (≤420px) ────────────────────────────────────────── */
 @media (max-width: 420px) {
 	:root {
 		--cell-size: 42px;
@@ -805,21 +841,22 @@ body {
 	}
 
 	.star-icon {
-		width: 34px;
-		height: 30px;
-		font-size: 0.8rem;
+		width: 22px;
+		height: 22px;
+		font-size: 0.7rem;
+		border-radius: 6px;
 	}
 
 	.controls button {
-		font-size: 0.75rem;
-		padding: 7px 9px;
+		font-size: 0.66rem;
+		padding: 4px 8px;
 	}
 
 	.board-panel {
-		padding: 6px;
+		padding: 4px;
 	}
 
 	.hud {
-		padding: 6px 8px;
+		padding: 4px 8px;
 	}
 }
