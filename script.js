@@ -39,7 +39,7 @@ const baseLevels = [
 		],
 		jugCells: [
 			{ row: 1, col: 1 },
-			{ row: 2, col: 6 },
+			{ row: 4, col: 6 },
 			{ row: 6, col: 2 },
 			{ row: 8, col: 4 }
 		],
@@ -92,7 +92,7 @@ const baseLevels = [
 		jugCells: [
 			{ row: 1, col: 6 },
 			{ row: 4, col: 2 },
-			{ row: 6, col: 5 },
+			{ row: 6, col: 6 },
 			{ row: 8, col: 3 }
 		],
 		dirtyWaterCells: [
@@ -117,11 +117,12 @@ const baseLevels = [
 			{ row: 5, col: 6 },
 			{ row: 6, col: 6 },
 			{ row: 7, col: 3 },
+      { row: 8, col: 3 },
 			{ row: 8, col: 2 }
 		],
 		jugCells: [
 			{ row: 1, col: 2 },
-			{ row: 3, col: 6 },
+			{ row: 4, col: 4 },
 			{ row: 6, col: 4 },
 			{ row: 8, col: 5 }
 		],
@@ -132,7 +133,10 @@ const baseLevels = [
 			{ row: 4, col: 3 },
 			{ row: 6, col: 1 },
 			{ row: 6, col: 5 },
-			{ row: 7, col: 1 }
+      { row: 4, col: 5 },
+			{ row: 5, col: 1 },
+			{ row: 6, col: 7 },
+			{ row: 7, col: 3 }
 		]
 	}
 ];
@@ -598,6 +602,10 @@ function showVictoryScreen() {
 	const level = getCurrentLevel();
 	const isFinalLevel = currentLevelIndex === levels.length - 1;
 
+	// Play the win sound effect
+	const winSound = new Audio('win.mp3');
+	winSound.play();
+
 	victoryMessage.textContent = `Level ${currentLevelIndex + 1} complete. ${level.mission}`;
 	victoryJugs.textContent = `Jugs collected: ${collectedJugCount}/${level.jugCells.length}`;
 	victoryPlayAgainButton.textContent = isFinalLevel ? 'Restart From Level 1' : 'Next Level';
@@ -826,20 +834,20 @@ function findWaterPath() {
 	const queue = [{ row: sourceCell.row, col: sourceCell.col, path: [] }];
 	const visited = new Set([`${sourceCell.row}-${sourceCell.col}`]);
 
+	// We prioritize down movement to feel more like gravity.
+	const directions = [
+		{ rowChange: 1, colChange: 0 },
+		{ rowChange: 0, colChange: 1 },
+		{ rowChange: 0, colChange: -1 },
+		{ rowChange: -1, colChange: 0 }
+	];
+
 	while (queue.length > 0) {
 		const current = queue.shift();
 
 		if (current.row === goalCell.row && current.col === goalCell.col) {
 			return current.path;
 		}
-
-		// We prioritize down movement to feel more like gravity.
-		const directions = [
-			{ rowChange: 1, colChange: 0 },
-			{ rowChange: 0, colChange: 1 },
-			{ rowChange: 0, colChange: -1 },
-			{ rowChange: -1, colChange: 0 }
-		];
 
 		for (let i = 0; i < directions.length; i++) {
 			const direction = directions[i];
@@ -883,7 +891,7 @@ function animateWater(path) {
 	}
 
 	if (!path || path.length === 0) {
-		statusMessage.textContent = 'No valid route found. Dig more tunnels from the blue spring to the green reservoir.';
+		statusMessage.textContent = 'No valid route found.';
 		waterStarted = false;
 		return;
 	}
@@ -992,7 +1000,7 @@ function resetGame() {
 	fitBoardToViewport();
 	createBoardData();
 	renderBoard();
-	statusMessage.textContent = `Level ${currentLevelIndex + 1}: ${getCurrentLevel().mission}`;
+	statusMessage.textContent = `Level ${currentLevelIndex + 1}: Excavate a route, then release water.`;
 }
 
 function advanceToNextLevel() {
